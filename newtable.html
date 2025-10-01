@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Attendance</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .form-section {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    input, button {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #f1f5f9;
+    }
+    tr:nth-child(even) {
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+  <h1>Attendance list for  AI branch (batch-A)</h1>
+
+  <div class="form-section">
+    <label>Date: <input type="date" id="dateInput"></label>
+    <label>Subject: <input type="text" id="subjectInput" placeholder="Enter subject"></label>
+    <button onclick="downloadPDF()">Download PDF</button>
+  </div>
+
+  <table id="attendanceTable">
+    <thead>
+      <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+        <th>Present</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Default date = today
+    document.getElementById('dateInput').valueAsDate = new Date();
+
+    // Student data (your list)
+    const students = [
+      { roll: "25EGEAI001", name: "ANITA NETWAL" },
+      { roll: "25EGEAI002", name: "BITTU GUPTA" },
+      { roll: "25EGEAI003", name: "DHEERAJ SINGHAL" },
+      { roll: "25EGEAI004", name: "DIPANSHU SAINI" },
+      { roll: "25EGEAI005", name: "FANISHWAR GOUTAM" },
+      { roll: "25EGEAI006", name: "HARSH VARDHAN SHARMA" },
+      { roll: "25EGEAI007", name: "HARSHIT KUMAR" },
+      { roll: "25EGEAI008", name: "HIMANSHU GAUR" },
+      { roll: "25EGEAI009", name: "ISHANT SEHRA" },
+      { roll: "25EGEAI010", name: "KANIKA" },
+      { roll: "25EGEAI011", name: "KARTIKAY SINGH CHOUDHARY" },
+      { roll: "25EGEAI012", name: "KRISH ARARWAL" },
+      { roll: "25EGEAI013", name: "MOHAMMAD INKAM" },
+      { roll: "25EGEAI014", name: "MOHIT SAINI" },
+      { roll: "25EGEAI015", name: "PALAK BAIRWA" },
+      { roll: "25EGEAI016", name: "PIYUSH DHAKAD" },
+      { roll: "25EGEAI017", name: "PRIYANSHI SHARMA" },
+      { roll: "25EGEAI018", name: "RAMESH BISNOI" },
+      { roll: "25EGEAI019", name: "RANJEET SWAMI" },
+      { roll: "25EGEAI020", name: "RAVI SHARMA" },
+      { roll: "25EGEAI021", name: "RIGVIDA MODI" },
+      { roll: "25EGEAI022", name: "ROHIT KUMAR" },
+      { roll: "25EGEAI023", name: "SAHIL KHAN" },
+      { roll: "25EGEAI024", name: "SAHIL KUMAR" },
+      { roll: "25EGEAI025", name: "SHANU TIWARI" },
+      { roll: "25EGEAI026", name: "SHIVAM DHAKER" },
+      { roll: "25EGEAI027", name: "SHUBHAM ARYA" },
+      { roll: "25EGEAI028", name: "SUNIL KUMAR" },
+      { roll: "25EGEAI029", name: "SURESH" },
+      { roll: "25EGEAI030", name: "VANSHIKA YADAV" },
+      { roll: "25EGEAI031", name: "VISHAL KUMAR" }
+    ];
+
+    // Generate table rows
+    const tbody = document.querySelector("#attendanceTable tbody");
+    students.forEach(stu => {
+      let row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${stu.roll}</td>
+        <td>${stu.name}</td>
+        <td><input type="checkbox"></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    // Download PDF
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let date = document.getElementById("dateInput").value;
+      let subject = document.getElementById("subjectInput").value || "N/A";
+
+      doc.setFontSize(14);
+      doc.text("Attendance Sheet", 14, 20);
+      doc.setFontSize(11);
+      doc.text("Date: " + date, 14, 28);
+      doc.text("Subject: " + subject, 14, 34);
+
+      let rows = [];
+      const trs = document.querySelectorAll("#attendanceTable tbody tr");
+      trs.forEach(tr => {
+        let roll = tr.cells[0].innerText;
+        let name = tr.cells[1].innerText;
+        let present = tr.cells[2].children[0].checked ? "Present" : "Absent";
+        rows.push([roll, name, present]);
+      });
+
+      doc.autoTable({
+        head: [['Roll No', 'Name', 'Attendance']],
+        body: rows,
+        startY: 42
+      });
+
+      doc.save(`attendance_${date}_${subject}.pdf`);
+    }
+  </script>
+</body>
+</html>
